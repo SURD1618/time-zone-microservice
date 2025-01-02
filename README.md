@@ -7,7 +7,7 @@ The **Time Zone Microservices Application** is a Spring Boot-based project that 
 
 ## Flow of Services
 
-![Flow Diagram](https://jcp-my.sharepoint.com/:wb:/p/rdas5/EbLNETxk6dJEiPXozVG5SDsBQfEoRzKmRqiOHpMgw-efdQ?e=HHuawg)
+![Service Flow](https://github.com/user-attachments/assets/38bb4e81-cbb8-40b3-9adc-b771137267c0)
 
 ---
 
