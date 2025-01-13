@@ -1,7 +1,9 @@
 package com.time_zone.time_converter_service.controller;
 
+import com.time_zone.time_converter_service.client.TimeDifferenceFeignClient;
 import com.time_zone.time_converter_service.model.TimeConverterResponse;
 import com.time_zone.time_converter_service.model.TimeDifferenceResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +18,9 @@ import java.util.Map;
 
 @RestController
 public class TimeConverterController {
+
+    @Autowired
+    private TimeDifferenceFeignClient timeDifferenceFeignClient;
 
     @GetMapping("/time-convert/from/{fromRegion}/to/{toRegion}/time/{time}")
     public TimeConverterResponse convertTime(@PathVariable String fromRegion, @PathVariable String toRegion, @PathVariable String time){
@@ -33,7 +38,7 @@ public class TimeConverterController {
         try {
             inputTime = LocalTime.parse(time, inputFormatter);              // Converts input time into a LocalTime object
         } catch (DateTimeParseException e) {
-            throw new RuntimeException("Invalid time format!!!");
+            throw new RuntimeException("invalid time format");
         }
 
         LocalTime convertedTime = inputTime                                     //adjusting the input time by adding the time difference
@@ -47,20 +52,27 @@ public class TimeConverterController {
     }
 
     private double fetchTimeDifference(String fromRegion, String toRegion) {
-
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("region1", fromRegion);
-        uriVariables.put("region2", toRegion);
-
-
-        ResponseEntity<TimeDifferenceResponse> responseEntity = new RestTemplate().getForEntity(            //http response
-                "http://localhost:8001/time-difference/between/region1/{region1}/and/region2/{region2}", TimeDifferenceResponse.class, uriVariables
-        );
-
-        //TimeDifferenceResponse response = new TimeDifferenceResponse("India", "China", 2.5);
-
-        TimeDifferenceResponse response = responseEntity.getBody();
-
+        // using Feign client to get the time difference
+        TimeDifferenceResponse response = timeDifferenceFeignClient.getTimeDifference(fromRegion, toRegion);
         return response != null ? response.getTimeDifference() : 0.0;
     }
+
+
+//    private double fetchTimeDifference(String fromRegion, String toRegion) {
+//
+//        Map<String, String> uriVariables = new HashMap<>();
+//        uriVariables.put("region1", fromRegion);
+//        uriVariables.put("region2", toRegion);
+//
+//
+//        ResponseEntity<TimeDifferenceResponse> responseEntity = new RestTemplate().getForEntity(            //http response
+//                "http://localhost:8001/time-difference/between/region1/{region1}/and/region2/{region2}", TimeDifferenceResponse.class, uriVariables
+//        );
+//
+//        //TimeDifferenceResponse response = new TimeDifferenceResponse("India", "China", 2.5);
+//
+//        TimeDifferenceResponse response = responseEntity.getBody();
+//
+//        return response != null ? response.getTimeDifference() : 0.0;
+//    }
 }
